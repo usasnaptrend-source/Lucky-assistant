@@ -1,0 +1,42 @@
+name: Build Lucky APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Lucky APK
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          elif [ -f gradlew.bat ]; then
+            gradle assembleDebug
+          else
+            echo "ERROR: Android project files or Gradle wrapper are missing."
+            exit 1
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lucky-Assistant-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
